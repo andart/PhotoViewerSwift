@@ -19,6 +19,12 @@ class PhotoViewerController: UIViewController, UIScrollViewDelegate, UIGestureRe
     var panRecognizer: UIPanGestureRecognizer?
     var imageDragStartingPoint: CGPoint?
     
+    class func showImage(image: UIImage, referenceView: UIView, inViewController: ViewController) {
+        let photoViwerController = PhotoViewerController(targetView: referenceView, image: image)
+        
+        photoViwerController.showFromViewController(viewController: inViewController)
+    }
+    
     init(targetView: UIView, image: UIImage) {
         self.referenceView = targetView
         self.scrollViewIsAnimatingAZoom = false
@@ -32,18 +38,18 @@ class PhotoViewerController: UIViewController, UIScrollViewDelegate, UIGestureRe
         fatalError("init(coder:) has not been implemented")
     }
     
-    public func showFromViewController(vc: UIViewController) {
+    func showFromViewController(viewController: UIViewController) {
         self.view.isUserInteractionEnabled = true
         
         let referenceFrameInWindow = self.referenceView.superview?.convert(self.referenceView.frame, to: nil)
         self.startRect = self.view.convert(referenceFrameInWindow!, to: nil)
         
-        self.snapshotView = self.snapshotFromParentmostViewController(viewController: vc)
+        self.snapshotView = self.snapshotFromParentmostViewController(viewController: viewController)
         self.view.insertSubview(self.snapshotView!, at: 0)
         
         self.view.addSubview(self.imageView)
         
-        vc.present(self, animated: false) { 
+        viewController.present(self, animated: false) {
             self.imageView.frame = self.startRect!
             UIView.animate(withDuration: 0.3, delay: 0.0, options: [.beginFromCurrentState, .curveEaseInOut], animations: {
                 self.overlayView.alpha = 1.0

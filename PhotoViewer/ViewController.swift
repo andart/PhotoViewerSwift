@@ -28,9 +28,7 @@ class ViewController: UIViewController {
     }()
     
     func tapAction() {
-        let pvc = PhotoViewerController(targetView: self.imageView, image: self.imageView.image!)
-        
-        pvc.showFromViewController(vc: self)
+        PhotoViewerController.showImage(image: UIImage(named: "1452736497_yumor12")!, referenceView: self.imageView, inViewController: self)
     }
 }
 
