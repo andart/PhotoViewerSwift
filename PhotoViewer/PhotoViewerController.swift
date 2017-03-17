@@ -41,8 +41,7 @@ class PhotoViewerController: UIViewController, UIScrollViewDelegate, UIGestureRe
     func showFromViewController(viewController: UIViewController) {
         self.view.isUserInteractionEnabled = true
         
-        let referenceFrameInWindow = self.referenceView.superview?.convert(self.referenceView.frame, to: nil)
-        self.startRect = self.view.convert(referenceFrameInWindow!, to: nil)
+        self.startRect = self.referenceFrameInMyView
         
         self.snapshotView = self.snapshotFromParentmostViewController(viewController: viewController)
         self.view.insertSubview(self.snapshotView!, at: 0)
@@ -92,7 +91,14 @@ class PhotoViewerController: UIViewController, UIScrollViewDelegate, UIGestureRe
         self.scrollView.addGestureRecognizer(self.panRecognizer!)
     }
     
-    private lazy var overlayView:UIView = {
+    private lazy var referenceFrameInMyView: CGRect = {
+        let referenceFrameInWindow = self.referenceView.superview?.convert(self.referenceView.frame, to: nil)
+        let referenceFrameInMyView = self.view.convert(referenceFrameInWindow!, to: nil)
+        
+        return referenceFrameInMyView;
+    }()
+    
+    private lazy var overlayView: UIView = {
         let overlayView = UIView(frame: self.view.bounds)
         overlayView.backgroundColor = UIColor.black
         overlayView.alpha = 0.0
@@ -100,12 +106,10 @@ class PhotoViewerController: UIViewController, UIScrollViewDelegate, UIGestureRe
         return overlayView
     }()
     
-    private lazy var imageView:UIImageView = {
+    private lazy var imageView: UIImageView = {
         
-        let referenceFrameInWindow = self.referenceView.superview?.convert(self.referenceView.frame, to: nil)
-        let referenceFrameInMyView = self.view.convert(referenceFrameInWindow!, from: nil)
         
-        let imageView = UIImageView(frame: referenceFrameInMyView)
+        let imageView = UIImageView(frame: self.referenceFrameInMyView)
         imageView.backgroundColor = UIColor.clear
         imageView.contentMode = UIViewContentMode.scaleAspectFill;
         imageView.clipsToBounds = true;
@@ -116,7 +120,7 @@ class PhotoViewerController: UIViewController, UIScrollViewDelegate, UIGestureRe
         return imageView;
     }()
     
-    private lazy var scrollView:UIScrollView = {
+    private lazy var scrollView: UIScrollView = {
         let scrollView = UIScrollView(frame: self.view.bounds)
         scrollView.delegate = self
         scrollView.zoomScale = 1.0
@@ -129,7 +133,7 @@ class PhotoViewerController: UIViewController, UIScrollViewDelegate, UIGestureRe
     }()
     
     func dismissVC() {
-        let imageFrame = self.view.convert(self.imageView.frame, from:self.scrollView)
+        let imageFrame = self.view.convert(self.imageView.frame, from: self.scrollView)
         self.imageView.transform = CGAffineTransform.identity
         self.imageView.layer.transform = CATransform3DIdentity
         self.imageView.removeFromSuperview()
@@ -151,7 +155,7 @@ class PhotoViewerController: UIViewController, UIScrollViewDelegate, UIGestureRe
         }
         
         let rawLocation = recognizer.location(in: recognizer.view)
-        let point = self.scrollView.convert(rawLocation, from:recognizer.view)
+        let point = self.scrollView.convert(rawLocation, from: recognizer.view)
         var targetZoomRect: CGRect
         if (self.scrollView.zoomScale == 1.0) {
             let zoomWidth = self.view.bounds.size.width / self.targetZoomForDoubleTap
